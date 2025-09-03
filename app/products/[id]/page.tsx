@@ -31,7 +31,7 @@ const products = [
     image: "/concrete-foundation-materials.png",
     rating: 4.8,
     reviews: 234,
-    supplier: "Dangote Factory Direct",
+    supplier: "Dangote Factory Directly",
     inStock: true,
     bulkDiscount: "7% off 100+ bags",
     description:
