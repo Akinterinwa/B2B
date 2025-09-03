@@ -28,7 +28,7 @@ const products = [
     price: 4500,
     bulkPrice: 4200,
     category: "Foundation Materials",
-    image: "/concrete-foundation-materials.png",
+    image: "/images/concrete-foundation-materials.png",
     rating: 4.8,
     reviews: 234,
     supplier: "Dangote Factory Directly",
