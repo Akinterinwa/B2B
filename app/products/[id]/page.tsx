@@ -1,17 +1,24 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useParams } from "next/navigation"
-import { useCart } from "@/lib/cart-context"
-import { Header } from "@/components/sections/header"
-import { Footer } from "@/components/sections/footer"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Star, ShoppingCart, ArrowLeft, Truck, Shield, Award } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import { useCart } from "@/lib/cart-context";
+import { Header } from "@/components/sections/header";
+import { Footer } from "@/components/sections/footer";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Star,
+  ShoppingCart,
+  ArrowLeft,
+  Truck,
+  Shield,
+  Award,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 // Sample product data (in real app, this would come from API/database)
 const products = [
@@ -21,7 +28,7 @@ const products = [
     price: 4500,
     bulkPrice: 4200,
     category: "Foundation Materials",
-    image: "/images/concrete-foundation-materials.png",
+    image: "/concrete-foundation-materials.png",
     rating: 4.8,
     reviews: 234,
     supplier: "Dangote Factory Direct",
@@ -51,27 +58,31 @@ const products = [
     ],
   },
   // Add other products here...
-]
+];
 
 export default function ProductDetailPage() {
-  const params = useParams()
-  const { state, dispatch } = useCart()
-  const [quantity, setQuantity] = useState(1)
-  const [selectedImage, setSelectedImage] = useState(0)
+  const params = useParams();
+  const { state, dispatch } = useCart();
+  const [quantity, setQuantity] = useState(1);
+  const [selectedImage, setSelectedImage] = useState(0);
 
-  const productId = Number.parseInt(params.id as string)
-  const product = products.find((p) => p.id === productId)
+  const productId = Number.parseInt(params.id as string);
+  const product = products.find((p) => p.id === productId);
 
-  const isInCart = state.items.some((item) => item.id === product.id)
-  const cartItem = state.items.find((item) => item.id === product.id)
+  const isInCart = product
+    ? state.items.some((item) => item.id === product.id)
+    : false;
+  const cartItem = product
+    ? state.items.find((item) => item.id === product.id)
+    : undefined;
 
   useEffect(() => {
     if (cartItem) {
-      setQuantity(cartItem.quantity)
+      setQuantity(cartItem.quantity);
     } else {
-      setQuantity(1)
+      setQuantity(1);
     }
-  }, [cartItem])
+  }, [cartItem]);
 
   if (!product) {
     return (
@@ -79,7 +90,9 @@ export default function ProductDetailPage() {
         <Header />
         <main className="container mx-auto px-4 py-8 max-w-7xl">
           <div className="text-center py-12">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">
+              Product Not Found
+            </h1>
             <Link href="/products">
               <Button>Back to Products</Button>
             </Link>
@@ -87,12 +100,12 @@ export default function ProductDetailPage() {
         </main>
         <Footer />
       </div>
-    )
+    );
   }
 
   const handleAddToCart = () => {
     if (isInCart) {
-      dispatch({ type: "REMOVE_ITEM", payload: product.id })
+      dispatch({ type: "REMOVE_ITEM", payload: product.id });
     } else {
       dispatch({
         type: "ADD_ITEM",
@@ -104,19 +117,22 @@ export default function ProductDetailPage() {
           image: product.image,
           supplier: product.supplier,
         },
-      })
+      });
     }
-  }
+  };
 
   const handleQuantityChange = (newQuantity: number) => {
-    setQuantity(newQuantity)
+    setQuantity(newQuantity);
     if (isInCart) {
-      dispatch({ type: "UPDATE_QUANTITY", payload: { id: product.id, quantity: newQuantity } })
+      dispatch({
+        type: "UPDATE_QUANTITY",
+        payload: { id: product.id, quantity: newQuantity },
+      });
     }
-  }
+  };
 
   // Sample images (in real app, product would have multiple images)
-  const productImages = [product.image, product.image, product.image]
+  const productImages = [product.image, product.image, product.image];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -125,7 +141,10 @@ export default function ProductDetailPage() {
       <main className="container mx-auto px-4 py-6 lg:py-8 max-w-7xl">
         {/* Breadcrumb */}
         <div className="flex items-center space-x-2 text-sm text-gray-600 mb-4 lg:mb-6">
-          <Link href="/products" className="hover:text-blue-900 flex items-center">
+          <Link
+            href="/products"
+            className="hover:text-blue-900 flex items-center"
+          >
             <ArrowLeft className="h-4 w-4 mr-1" />
             Back to Products
           </Link>
@@ -147,7 +166,9 @@ export default function ProductDetailPage() {
               />
               {!product.inStock && (
                 <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                  <span className="text-white text-lg font-semibold">Out of Stock</span>
+                  <span className="text-white text-lg font-semibold">
+                    Out of Stock
+                  </span>
                 </div>
               )}
             </div>
@@ -159,7 +180,9 @@ export default function ProductDetailPage() {
                   key={index}
                   onClick={() => setSelectedImage(index)}
                   className={`relative w-16 h-16 lg:w-20 lg:h-20 rounded-lg overflow-hidden border-2 transition-colors ${
-                    selectedImage === index ? "border-blue-900" : "border-gray-200"
+                    selectedImage === index
+                      ? "border-blue-900"
+                      : "border-gray-200"
                   }`}
                 >
                   <Image
@@ -177,8 +200,12 @@ export default function ProductDetailPage() {
           <div className="space-y-4 lg:space-y-6">
             <div>
               <div className="flex items-start justify-between mb-2">
-                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{product.name}</h1>
-                <Badge className="bg-orange-500 text-white">{product.bulkDiscount}</Badge>
+                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
+                  {product.name}
+                </h1>
+                <Badge className="bg-orange-500 text-white">
+                  {product.bulkDiscount}
+                </Badge>
               </div>
               <p className="text-gray-600 mb-4">{product.supplier}</p>
 
@@ -189,7 +216,9 @@ export default function ProductDetailPage() {
                       <Star
                         key={i}
                         className={`h-5 w-5 ${
-                          i < Math.floor(product.rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                          i < Math.floor(product.rating)
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-gray-300"
                         }`}
                       />
                     ))}
@@ -204,7 +233,9 @@ export default function ProductDetailPage() {
             {/* Pricing */}
             <div className="space-y-3">
               <div className="flex items-baseline space-x-3">
-                <span className="text-3xl lg:text-4xl font-bold text-gray-900">₦{product.price.toLocaleString()}</span>
+                <span className="text-3xl lg:text-4xl font-bold text-gray-900">
+                  ₦{product.price.toLocaleString()}
+                </span>
                 <span className="text-gray-600">per unit</span>
               </div>
               <div className="text-green-600 font-medium">
@@ -215,18 +246,28 @@ export default function ProductDetailPage() {
             {/* Quantity Selector */}
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Quantity
+                </label>
                 <div className="flex items-center space-x-3">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleQuantityChange(Math.max(1, quantity - 1))}
+                    onClick={() =>
+                      handleQuantityChange(Math.max(1, quantity - 1))
+                    }
                     disabled={quantity <= 1}
                   >
                     -
                   </Button>
-                  <span className="px-4 py-2 border rounded-md text-center min-w-[60px]">{quantity}</span>
-                  <Button variant="outline" size="sm" onClick={() => handleQuantityChange(quantity + 1)}>
+                  <span className="px-4 py-2 border rounded-md text-center min-w-[60px]">
+                    {quantity}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleQuantityChange(quantity + 1)}
+                  >
                     +
                   </Button>
                 </div>
@@ -235,7 +276,9 @@ export default function ProductDetailPage() {
               <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
                 <Button
                   className={`flex-1 ${
-                    isInCart ? "bg-red-600 hover:bg-red-700 text-white" : "bg-blue-900 hover:bg-blue-800 text-white"
+                    isInCart
+                      ? "bg-red-600 hover:bg-red-700 text-white"
+                      : "bg-blue-900 hover:bg-blue-800 text-white"
                   }`}
                   disabled={!product.inStock}
                   onClick={handleAddToCart}
@@ -279,15 +322,22 @@ export default function ProductDetailPage() {
 
               <TabsContent value="description" className="mt-6 space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">Product Description</h3>
-                  <p className="text-gray-700 leading-relaxed">{product.description}</p>
+                  <h3 className="text-lg font-semibold mb-3">
+                    Product Description
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed">
+                    {product.description}
+                  </p>
                 </div>
 
                 <div>
                   <h3 className="text-lg font-semibold mb-3">Key Features</h3>
                   <ul className="space-y-2">
                     {product.features.map((feature, index) => (
-                      <li key={index} className="flex items-center text-gray-700">
+                      <li
+                        key={index}
+                        className="flex items-center text-gray-700"
+                      >
                         <span className="w-2 h-2 bg-blue-900 rounded-full mr-3 flex-shrink-0"></span>
                         {feature}
                       </li>
@@ -297,14 +347,23 @@ export default function ProductDetailPage() {
               </TabsContent>
 
               <TabsContent value="specifications" className="mt-6">
-                <h3 className="text-lg font-semibold mb-4">Technical Specifications</h3>
+                <h3 className="text-lg font-semibold mb-4">
+                  Technical Specifications
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {Object.entries(product.specifications).map(([key, value]) => (
-                    <div key={key} className="flex justify-between py-2 border-b border-gray-200">
-                      <span className="font-medium text-gray-700">{key}:</span>
-                      <span className="text-gray-900">{value}</span>
-                    </div>
-                  ))}
+                  {Object.entries(product.specifications).map(
+                    ([key, value]) => (
+                      <div
+                        key={key}
+                        className="flex justify-between py-2 border-b border-gray-200"
+                      >
+                        <span className="font-medium text-gray-700">
+                          {key}:
+                        </span>
+                        <span className="text-gray-900">{value}</span>
+                      </div>
+                    )
+                  )}
                 </div>
               </TabsContent>
 
@@ -312,9 +371,16 @@ export default function ProductDetailPage() {
                 <h3 className="text-lg font-semibold mb-4">Volume Pricing</h3>
                 <div className="space-y-3">
                   {product.bulkPricing.map((tier, index) => (
-                    <div key={index} className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                      <span className="font-medium text-gray-700">{tier.quantity}</span>
-                      <span className="text-lg font-bold text-gray-900">₦{tier.price.toLocaleString()}</span>
+                    <div
+                      key={index}
+                      className="flex justify-between items-center p-4 bg-gray-50 rounded-lg"
+                    >
+                      <span className="font-medium text-gray-700">
+                        {tier.quantity}
+                      </span>
+                      <span className="text-lg font-bold text-gray-900">
+                        ₦{tier.price.toLocaleString()}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -326,5 +392,5 @@ export default function ProductDetailPage() {
 
       <Footer />
     </div>
-  )
+  );
 }
