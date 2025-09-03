@@ -17,7 +17,9 @@ export default function HomePage() {
       <Header />
       <FeaturedDeals />
       <Hero />
-      <CostCalculator />
+      <div id="cost-calculator">
+        <CostCalculator />
+      </div>
       <BentoStats />
       <ProductCategories />
       <TrustBadges />

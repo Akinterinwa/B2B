@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { CheckCircle, Circle, ArrowRight } from "lucide-react"
+import { CheckCircle, Circle, ArrowRight, ArrowDown } from "lucide-react"
 
 const steps = [
   {
@@ -39,12 +39,22 @@ export function ProgressIndicators() {
 
         <div className="max-w-4xl mx-auto">
           <div className="relative">
-            {/* Progress Line */}
-            <div className="absolute top-6 left-6 right-6 h-0.5 bg-slate-200">
+            {/* Progress Line - Desktop */}
+            <div className="hidden md:block absolute top-6 left-6 right-6 h-0.5 bg-slate-200">
               <motion.div
                 className="h-full bg-orange-500"
                 initial={{ width: "0%" }}
                 whileInView={{ width: "75%" }}
+                transition={{ duration: 2, ease: "easeInOut" }}
+                viewport={{ once: true }}
+              />
+            </div>
+
+            <div className="md:hidden absolute left-6 top-6 bottom-6 w-0.5 bg-slate-200">
+              <motion.div
+                className="w-full bg-orange-500"
+                initial={{ height: "0%" }}
+                whileInView={{ height: "75%" }}
                 transition={{ duration: 2, ease: "easeInOut" }}
                 viewport={{ once: true }}
               />
@@ -75,11 +85,30 @@ export function ProgressIndicators() {
                     <p className="text-sm text-slate-600">{step.description}</p>
                   </div>
 
-                  {/* Arrow (except for last step) */}
                   {index < steps.length - 1 && (
-                    <div className="hidden md:block absolute top-6 -right-4 z-20">
-                      <ArrowRight className="h-4 w-4 text-slate-400" />
-                    </div>
+                    <>
+                      {/* Desktop Arrow - Right */}
+                      <motion.div
+                        className="hidden md:block absolute top-6 -right-4 z-20"
+                        initial={{ opacity: 0, x: -10 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.5, delay: (index + 1) * 0.3 }}
+                        viewport={{ once: true }}
+                      >
+                        <ArrowRight className="h-4 w-4 text-slate-400" />
+                      </motion.div>
+
+                      {/* Mobile Arrow - Down */}
+                      <motion.div
+                        className="md:hidden absolute left-6 -bottom-4 z-20 transform -translate-x-1/2"
+                        initial={{ opacity: 0, y: -10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: (index + 1) * 0.3 }}
+                        viewport={{ once: true }}
+                      >
+                        <ArrowDown className="h-4 w-4 text-slate-400" />
+                      </motion.div>
+                    </>
                   )}
                 </motion.div>
               ))}
