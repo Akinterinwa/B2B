@@ -26,17 +26,24 @@ export function DeliveryMap() {
 
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="relative">
-            <div className="bg-slate-100 rounded-2xl p-8 h-96 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-slate-200 to-slate-300 opacity-50"></div>
+            <div className="rounded-2xl bg-slate-300 p-8 h-96 relative overflow-hidden">
+              <div
+                className="absolute inset-0 bg-slate-900 bg-cover bg-center bg-no-repeat rounded-2xl"
+                style={{
+                  backgroundImage: `url('https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ce2f97f0726ac6dd42fbebafcf79d85a696719e5-Eqf3brTrIgG7PDUHY0lfdrt3YX4XwZ.png')`,
+                }}
+              ></div>
+              <div className="absolute inset-0 bg-opacity-10 rounded-2xl"></div>
+
               {deliveryZones.map((zone) => (
                 <div
                   key={zone.name}
-                  className={`absolute ${zone.coords} transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-300 hover:scale-110`}
+                  className={`absolute ${zone.coords} transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-300 hover:scale-110 z-10`}
                   onClick={() => setSelectedZone(zone.name)}
                 >
-                  <div className={`w-4 h-4 ${zone.color} rounded-full animate-pulse`}></div>
+                  <div className={`w-5 h-5 ${zone.color} rounded-full border-2 border-white shadow-lg`}></div>
                   <div
-                    className={`w-8 h-8 ${zone.color} rounded-full opacity-30 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-ping`}
+                    className={`w-10 h-10 ${zone.color} rounded-full opacity-20 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-ping`}
                   ></div>
                 </div>
               ))}

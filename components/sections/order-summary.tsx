@@ -118,7 +118,7 @@ Please confirm availability and payment details.`
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="name">Full Name *</Label>
+              <Label htmlFor="name" className="pb-2" >Full Name *</Label>
               <Input
                 id="name"
                 value={contactInfo.name}
@@ -127,7 +127,7 @@ Please confirm availability and payment details.`
               />
             </div>
             <div>
-              <Label htmlFor="phone">Phone Number *</Label>
+              <Label htmlFor="phone" className="pb-2">Phone Number *</Label>
               <Input
                 id="phone"
                 value={contactInfo.phone}
@@ -136,7 +136,7 @@ Please confirm availability and payment details.`
               />
             </div>
             <div>
-              <Label htmlFor="location">Delivery Location *</Label>
+              <Label htmlFor="location" className="pb-2">Delivery Location *</Label>
               <Input
                 id="location"
                 value={contactInfo.location}
@@ -145,7 +145,7 @@ Please confirm availability and payment details.`
               />
             </div>
             <div>
-              <Label htmlFor="notes">Additional Notes</Label>
+              <Label htmlFor="notes" className="pb-2">Additional Notes</Label>
               <Textarea
                 id="notes"
                 value={contactInfo.notes}

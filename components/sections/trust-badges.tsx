@@ -1,10 +1,10 @@
 import Image from "next/image"
 
 const badges = [
-  { name: "ISO 9001 Certified", logo: "/iso-9001-certification-badge.png" },
-  { name: "Better Business Bureau A+", logo: "/bbb-a-rating-badge.png" },
-  { name: "Construction Industry Award", logo: "/construction-industry-award-badge.png" },
-  { name: "Green Building Certified", logo: "/green-building-certification-badge.png" },
+  { name: "ISO 9001 Certified", logo: "/images/Dangote_Group_Logo.png" },
+  { name: "Better Business Bureau A+", logo: "/images/lafarge-logo.jpg" },
+  { name: "Construction Industry Award", logo: "/images/pt3-ckeWWb4Z.jpeg" },
+  { name: "Green Building Certified", logo: "/images/lafarge-logo.jpg"},
 ]
 
 export function TrustBadges() {
