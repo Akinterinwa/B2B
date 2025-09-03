@@ -1,59 +1,26 @@
 "use client"
 
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Minus, Plus, Trash2 } from "lucide-react"
+import { Minus, Plus, Trash2, Eye } from "lucide-react"
 import Image from "next/image"
-
-interface CartItem {
-  id: string
-  name: string
-  price: number
-  quantity: number
-  image: string
-  unit: string
-}
+import { useCart } from "@/lib/cart-context"
+import Link from "next/link"
 
 export function CartItems() {
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      id: "1",
-      name: "Dangote Cement",
-      price: 4500,
-      quantity: 20,
-      image: "/concrete-foundation-materials.png",
-      unit: "bag",
-    },
-    {
-      id: "2",
-      name: "Aluminum Roofing Sheets",
-      price: 8500,
-      quantity: 15,
-      image: "/roofing-shingles-materials.png",
-      unit: "sheet",
-    },
-    {
-      id: "3",
-      name: "Steel Nails Pack",
-      price: 2500,
-      quantity: 5,
-      image: "/construction-hardware-nails-screws.png",
-      unit: "pack",
-    },
-  ])
+  const { state, dispatch } = useCart()
 
-  const updateQuantity = (id: string, newQuantity: number) => {
+  const updateQuantity = (id: number, newQuantity: number) => {
     if (newQuantity < 1) return
-    setCartItems((items) => items.map((item) => (item.id === id ? { ...item, quantity: newQuantity } : item)))
+    dispatch({ type: "UPDATE_QUANTITY", payload: { id, quantity: newQuantity } })
   }
 
-  const removeItem = (id: string) => {
-    setCartItems((items) => items.filter((item) => item.id !== id))
+  const removeItem = (id: number) => {
+    dispatch({ type: "REMOVE_ITEM", payload: id })
   }
 
-  if (cartItems.length === 0) {
+  if (state.items.length === 0) {
     return (
       <Card>
         <CardContent className="p-8 text-center">
@@ -63,13 +30,15 @@ export function CartItems() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={1}
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2 2H9a2 2 0 00-2 2v4.01"
               />
             </svg>
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Your cart is empty</h3>
           <p className="text-gray-600 mb-4">Add some materials to get started</p>
-          <Button>Continue Shopping</Button>
+          <Link href="/products">
+            <Button>Continue Shopping</Button>
+          </Link>
         </CardContent>
       </Card>
     )
@@ -77,7 +46,7 @@ export function CartItems() {
 
   return (
     <div className="space-y-4">
-      {cartItems.map((item) => (
+      {state.items.map((item) => (
         <Card key={item.id}>
           <CardContent className="p-6">
             <div className="flex flex-col sm:flex-row gap-4">
@@ -93,9 +62,8 @@ export function CartItems() {
 
               <div className="flex-1 min-w-0">
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">{item.name}</h3>
-                <p className="text-gray-600 mb-3">
-                  ₦{item.price.toLocaleString()} per {item.unit}
-                </p>
+                <p className="text-gray-600 mb-1">₦{item.price.toLocaleString()} per unit</p>
+                <p className="text-sm text-gray-500 mb-3">Supplier: {item.supplier}</p>
 
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex items-center gap-3">
@@ -132,18 +100,27 @@ export function CartItems() {
                       <p className="text-lg font-semibold text-gray-900">
                         ₦{(item.price * item.quantity).toLocaleString()}
                       </p>
-                      <p className="text-sm text-gray-600">
-                        {item.quantity} {item.unit}s
-                      </p>
+                      <p className="text-sm text-gray-600">{item.quantity} units</p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeItem(item.id)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Link href={`/products/${item.id}`}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeItem(item.id)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useCart } from "@/lib/cart-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search, Menu, X, ShoppingCart } from "lucide-react"
@@ -8,6 +9,7 @@ import Link from "next/link"
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { state } = useCart()
 
   return (
     <header className="border-b bg-white sticky top-0 z-50">
@@ -45,9 +47,11 @@ export function Header() {
             <Link href="/cart">
               <Button variant="ghost" size="sm" className="relative">
                 <ShoppingCart className="h-5 w-5" />
-                <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  3
-                </span>
+                {state.totalItems > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {state.totalItems}
+                  </span>
+                )}
               </Button>
             </Link>
 
@@ -100,7 +104,7 @@ export function Header() {
 
               <Link href="/cart" className="flex items-center space-x-2 text-gray-700 hover:text-blue-900 py-2">
                 <ShoppingCart className="h-5 w-5" />
-                <span>Cart (3)</span>
+                <span>Cart ({state.totalItems})</span>
               </Link>
 
               {/* Mobile login button */}

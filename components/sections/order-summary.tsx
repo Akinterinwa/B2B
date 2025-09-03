@@ -1,14 +1,16 @@
 "use client"
 
 import { useState } from "react"
+import { useCart } from "@/lib/cart-context"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "../ui/label"
-import { Textarea } from "../ui/textarea"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { Copy, MessageCircle, Phone } from "lucide-react"
 
 export function OrderSummary() {
+  const { state } = useCart()
   const [orderGenerated, setOrderGenerated] = useState(false)
   const [orderCode, setOrderCode] = useState("")
   const [contactInfo, setContactInfo] = useState({
@@ -18,14 +20,8 @@ export function OrderSummary() {
     notes: "",
   })
 
-  // Sample cart data - in real app this would come from state management
-  const cartItems = [
-    { name: "Dangote Cement", quantity: 20, price: 4500, unit: "bag" },
-    { name: "Aluminum Roofing Sheets", quantity: 15, price: 8500, unit: "sheet" },
-    { name: "Steel Nails Pack", quantity: 5, price: 2500, unit: "pack" },
-  ]
-
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const cartItems = state.items
+  const subtotal = state.totalPrice
   const deliveryFee = 15000
   const total = subtotal + deliveryFee
 
@@ -45,7 +41,7 @@ export function OrderSummary() {
 Order Code: ${orderCode}
 
 Items:
-${cartItems.map((item) => `- ${item.quantity} ${item.unit}s of ${item.name}`).join("\n")}
+${cartItems.map((item) => `- ${item.quantity} unit(s) of ${item.name}`).join("\n")}
 
 Total Estimate: ₦${total.toLocaleString()}
 
@@ -66,6 +62,20 @@ Please confirm availability and payment details.`
     window.location.href = "tel:+2348123456789"
   }
 
+  if (cartItems.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Order Summary</CardTitle>
+        </CardHeader>
+        <CardContent className="text-center py-8">
+          <p className="text-gray-500 mb-4">Your cart is empty</p>
+          <p className="text-sm text-gray-400">Add some products to get started</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
   if (!orderGenerated) {
     return (
       <div className="space-y-6">
@@ -75,8 +85,8 @@ Please confirm availability and payment details.`
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              {cartItems.map((item, index) => (
-                <div key={index} className="flex justify-between text-sm">
+              {cartItems.map((item) => (
+                <div key={item.id} className="flex justify-between text-sm">
                   <span>
                     {item.quantity} × {item.name}
                   </span>
@@ -175,10 +185,10 @@ Please confirm availability and payment details.`
 
         <div className="space-y-2 text-sm">
           <h4 className="font-semibold">Order Summary:</h4>
-          {cartItems.map((item, index) => (
-            <div key={index} className="flex justify-between">
+          {cartItems.map((item) => (
+            <div key={item.id} className="flex justify-between">
               <span>
-                - {item.quantity} {item.unit}s of {item.name}
+                - {item.quantity} unit(s) of {item.name}
               </span>
             </div>
           ))}
