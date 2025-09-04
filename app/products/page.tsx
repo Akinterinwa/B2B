@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { useCart } from "@/lib/cart-context"
 import { Header } from "@/components/sections/header"
 import { Footer } from "@/components/sections/footer"
@@ -105,10 +106,18 @@ const products = [
 
 export default function ProductsPage() {
   const { state, dispatch } = useCart()
+  const searchParams = useSearchParams()
   const [selectedCategory, setSelectedCategory] = useState("All Products")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [priceRange, setPriceRange] = useState([0, 50000])
   const [searchQuery, setSearchQuery] = useState("")
+
+  useEffect(() => {
+    const categoryParam = searchParams.get("category")
+    if (categoryParam && categories.includes(categoryParam)) {
+      setSelectedCategory(categoryParam)
+    }
+  }, [searchParams])
 
   const filteredProducts = products.filter((product) => {
     const matchesCategory = selectedCategory === "All Products" || product.category === selectedCategory
