@@ -54,12 +54,12 @@ ${contactInfo.notes ? `Notes: ${contactInfo.notes}` : ""}
 
 Please confirm availability and payment details.`
 
-    const whatsappUrl = `https://wa.me/2348123456789?text=${encodeURIComponent(message)}`
+    const whatsappUrl = `https://wa.me/2347026045597?text=${encodeURIComponent(message)}`
     window.open(whatsappUrl, "_blank")
   }
 
   const callSalesTeam = () => {
-    window.location.href = "tel:+2348123456789"
+    window.location.href = "tel:+2347026045597"
   }
 
   if (cartItems.length === 0) {
