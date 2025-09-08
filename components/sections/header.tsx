@@ -17,7 +17,7 @@ export function Header() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-8">
             <Link href="/">
-              <h1 className="text-xl md:text-2xl font-bold text-blue-900 cursor-pointer">BuildSource Pro</h1>
+              <h1 className="text-xl md:text-2xl font-bold text-blue-900 cursor-pointer">Smart build</h1>
             </Link>
             <nav className="hidden lg:flex space-x-6">
               <Link href="/products" className="text-gray-700 hover:text-blue-900">
