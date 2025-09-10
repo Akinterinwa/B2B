@@ -33,9 +33,9 @@ export function Hero() {
               to your job site.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/products">
+              <Link href="/tracking">
                 <Button size="lg" className="bg-orange-500 hover:bg-orange-600 w-full sm:w-auto">
-                  View Products
+                  Check Tracking Code
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
