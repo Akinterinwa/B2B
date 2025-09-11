@@ -3,9 +3,10 @@ import { doc, setDoc, getDoc, updateDoc, collection, getDocs, query, orderBy } f
 
 export interface DeliveryData {
   trackingCode: string
-  customerName: string
-  customerPhone: string
-  customerAddress: string
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
   items: Array<{
     name: string
     quantity: number
@@ -14,6 +15,7 @@ export interface DeliveryData {
   totalAmount: number
   status: "pending" | "confirmed" | "shipped" | "delivered"
   location: string
+  notes?: string
   createdAt: Date
   updatedAt: Date
   estimatedDelivery?: Date

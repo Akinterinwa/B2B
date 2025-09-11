@@ -171,15 +171,15 @@ export default function TrackingPage() {
                   <CardContent className="space-y-4">
                     <div className="p-4 bg-gray-50 rounded-lg">
                       <p className="text-sm font-medium text-gray-600 mb-1">Customer Name</p>
-                      <p className="text-lg font-semibold text-gray-900">{delivery.customerName}</p>
+                      <p className="text-lg font-semibold text-gray-900">{delivery.firstName} {delivery.lastName}</p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-lg">
                       <p className="text-sm font-medium text-gray-600 mb-1">Phone Number</p>
-                      <p className="text-lg font-semibold text-gray-900">{delivery.customerPhone}</p>
+                      <p className="text-lg font-semibold text-gray-900">{delivery.phone}</p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-lg">
                       <p className="text-sm font-medium text-gray-600 mb-1">Delivery Address</p>
-                      <p className="text-lg font-semibold text-gray-900">{delivery.customerAddress}</p>
+                      <p className="text-lg font-semibold text-gray-900">{delivery.location}</p>
                     </div>
                   </CardContent>
                 </Card>
