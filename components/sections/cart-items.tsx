@@ -1,8 +1,8 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { Minus, Plus, Trash2, Eye } from "lucide-react"
 import Image from "next/image"
 import { useCart } from "@/lib/cart-context"
@@ -10,15 +10,42 @@ import Link from "next/link"
 
 export function CartItems() {
   const { state, dispatch } = useCart()
+  const [localQuantities, setLocalQuantities] = useState<{ [key: number]: number }>({})
 
-  const updateQuantity = (id: number, newQuantity: number) => {
+  useEffect(() => {
+    const quantities = state.items.reduce(
+      (acc, item) => {
+        acc[item.id] = item.quantity
+        return acc
+      },
+      {} as { [key: number]: number }
+    )
+    setLocalQuantities(quantities)
+  }, [state.items])
+
+  const handleLocalQuantityChange = (id: number, newQuantity: number) => {
     if (newQuantity < 1) return
-    dispatch({ type: "UPDATE_QUANTITY", payload: { id, quantity: newQuantity } })
+    setLocalQuantities((prev) => ({
+      ...prev,
+      [id]: newQuantity,
+    }))
+  }
+
+  const updateCart = () => {
+    Object.keys(localQuantities).forEach((idStr) => {
+      const id = Number(idStr)
+      const cartItem = state.items.find((item) => item.id === id)
+      if (cartItem && cartItem.quantity !== localQuantities[id]) {
+        dispatch({ type: "UPDATE_QUANTITY", payload: { id, quantity: localQuantities[id] } })
+      }
+    })
   }
 
   const removeItem = (id: number) => {
     dispatch({ type: "REMOVE_ITEM", payload: id })
   }
+
+  const isDirty = state.items.some((item) => localQuantities[item.id] !== item.quantity)
 
   if (state.items.length === 0) {
     return (
@@ -46,88 +73,88 @@ export function CartItems() {
 
   return (
     <div className="space-y-4">
-      {state.items.map((item) => (
-        <Card key={item.id}>
-          <CardContent className="p-6">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-shrink-0">
-                <Image
-                  src={item.image || "/placeholder.svg"}
-                  alt={item.name}
-                  width={100}
-                  height={100}
-                  className="rounded-lg object-cover"
-                />
-              </div>
+      {state.items.map((item) => {
+        const localQuantity = localQuantities[item.id] || item.quantity
+        return (
+          <Card key={item.id}>
+            <CardContent className="p-6">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-shrink-0">
+                  <Image
+                    src={item.image || "/placeholder.svg"}
+                    alt={item.name}
+                    width={100}
+                    height={100}
+                    className="rounded-lg object-cover"
+                  />
+                </div>
 
-              <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">{item.name}</h3>
-                <p className="text-gray-600 mb-1">₦{item.price.toLocaleString()} per unit</p>
-                <p className="text-sm text-gray-500 mb-3">Supplier: {item.supplier}</p>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">{item.name}</h3>
+                  <p className="text-gray-600 mb-1">₦{item.price.toLocaleString()} per unit</p>
+                  <p className="text-sm text-gray-500 mb-3">Supplier: {item.supplier}</p>
 
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm text-gray-600">Quantity:</span>
-                    <div className="flex items-center border rounded-lg">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex items-center space-x-3">
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="h-8 w-8 p-0"
+                        onClick={() => handleLocalQuantityChange(item.id, localQuantity - 1)}
+                        disabled={localQuantity <= 1}
                       >
-                        <Minus className="h-4 w-4" />
+                        -
                       </Button>
-                      <Input
-                        type="number"
-                        value={item.quantity}
-                        onChange={(e) => updateQuantity(item.id, Number.parseInt(e.target.value) || 1)}
-                        className="w-16 h-8 text-center border-0 focus:ring-0"
-                        min="1"
-                      />
+                      <span className="px-4 py-2 border rounded-md text-center min-w-[60px]">
+                        {localQuantity}
+                      </span>
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="h-8 w-8 p-0"
+                        onClick={() => handleLocalQuantityChange(item.id, localQuantity + 1)}
                       >
-                        <Plus className="h-4 w-4" />
+                        +
                       </Button>
                     </div>
-                  </div>
 
-                  <div className="flex items-center justify-between sm:justify-end gap-4">
-                    <div className="text-right">
-                      <p className="text-lg font-semibold text-gray-900">
-                        ₦{(item.price * item.quantity).toLocaleString()}
-                      </p>
-                      <p className="text-sm text-gray-600">{item.quantity} units</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Link href={`/products/${item.id}`}>
+                    <div className="flex items-center justify-between sm:justify-end gap-4">
+                      <div className="text-right">
+                        <p className="text-lg font-semibold text-gray-900">
+                          ₦{(item.price * localQuantity).toLocaleString()}
+                        </p>
+                        <p className="text-sm text-gray-600">{localQuantity} units</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Link href={`/products/${item.id}`}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </Link>
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          onClick={() => removeItem(item.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
-                          <Eye className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4" />
                         </Button>
-                      </Link>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeItem(item.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        )
+      })}
+      {isDirty && (
+        <div className="flex justify-end pt-4">
+          <Button onClick={updateCart}>Update Cart</Button>
+        </div>
+      )}
     </div>
   )
 }
