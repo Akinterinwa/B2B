@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { format } from "date-fns"
 import { Search, Package, Truck, CheckCircle, Clock, MapPin, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -148,7 +149,7 @@ export default function TrackingPage() {
                       <Calendar className="w-5 h-5 text-gray-400" />
                       <div>
                         <p className="text-sm text-gray-600">Last Updated</p>
-                        <p className="font-semibold text-gray-900">{delivery.updatedAt.toLocaleDateString()}</p>
+                        <p className="font-semibold text-gray-900">{format(delivery.updatedAt, "PPP")}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
