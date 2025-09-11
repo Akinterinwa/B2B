@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useParams } from "next/navigation"
-import { useCart } from "@/lib/cart-context"
-import { Header } from "@/components/sections/header"
-import { Footer } from "@/components/sections/footer"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Star, ShoppingCart, ArrowLeft, Truck, Shield, Award } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import { useCart } from "@/lib/cart-context";
+import { Header } from "@/components/sections/header";
+import { Footer } from "@/components/sections/footer";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Star, ShoppingCart, ArrowLeft, Truck, Shield, Award } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 // Sample product data (in real app, this would come from API/database)
 const products = [
@@ -51,42 +51,42 @@ const products = [
     ],
   },
   // Add other products here...
-]
+];
 
 export default function ProductDetailPage() {
-  const params = useParams()
-  const { state, dispatch } = useCart()
-  const [quantity, setQuantity] = useState(1)
-  const [selectedImage, setSelectedImage] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)
-  const [product, setProduct] = useState<(typeof products)[0] | null>(null)
-  const productId = Number.parseInt(params.id as string)
-  const isInCart = state.items.some((item) => item.id === productId)
-  const cartItem = state.items.find((item) => item.id === productId)
+  const params = useParams();
+  const { state, dispatch } = useCart();
+  const [quantity, setQuantity] = useState(1);
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [product, setProduct] = useState<(typeof products)[0] | null>(null);
+  const productId = Number.parseInt(params.id as string);
+  const isInCart = state.items.some((item) => item.id === productId);
+  const cartItem = state.items.find((item) => item.id === productId);
 
   useEffect(() => {
     const fetchProduct = async () => {
-      setIsLoading(true)
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      setIsLoading(true);
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      const foundProduct = products.find((p) => p.id === productId)
-      setProduct(foundProduct || null)
-      setIsLoading(false)
-    }
+      const foundProduct = products.find((p) => p.id === productId);
+      setProduct(foundProduct || null);
+      setIsLoading(false);
+    };
 
-    fetchProduct()
-  }, [productId])
+    fetchProduct();
+  }, [productId]);
 
   useEffect(() => {
     if (cartItem) {
-      setQuantity(cartItem.quantity)
+      setQuantity(cartItem.quantity);
     } else {
-      setQuantity(1)
+      setQuantity(1);
     }
-  }, [cartItem])
+  }, [cartItem]);
 
   if (isLoading) {
-    return null // This will show the loading.tsx file
+    return null; // This will show the loading.tsx file
   }
 
   if (!product) {
@@ -103,35 +103,18 @@ export default function ProductDetailPage() {
         </main>
         <Footer />
       </div>
-    )
+    );
   }
 
   const handleAddToCart = () => {
-    if (isInCart) {
-      dispatch({ type: "REMOVE_ITEM", payload: productId })
-    } else {
-      dispatch({
-        type: "ADD_ITEM",
-        payload: {
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          bulkPrice: product.bulkPrice,
-          image: product.image,
-          supplier: product.supplier,
-        },
-      })
-    }
-  }
+    dispatch({ type: "TOGGLE_ITEM", payload: { ...product, quantity } });
+  };
 
   const handleQuantityChange = (newQuantity: number) => {
-    setQuantity(newQuantity)
-    if (isInCart) {
-      dispatch({ type: "UPDATE_QUANTITY", payload: { id: product.id, quantity: newQuantity } })
-    }
-  }
+    setQuantity(newQuantity);
+  };
 
-  const productImages = [product.image, product.image, product.image]
+  const productImages = [product.image, product.image, product.image];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -341,5 +324,5 @@ export default function ProductDetailPage() {
 
       <Footer />
     </div>
-  )
+  );
 }
