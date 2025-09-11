@@ -36,75 +36,86 @@ function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case "TOGGLE_ITEM": {
       const existingItem = state.items.find((item) => item.id === action.payload.id)
+      let updatedItems: CartItem[]
 
       if (existingItem) {
-        return {
-          ...state,
-          items: state.items.filter((item) => item.id !== action.payload.id),
-          totalItems: state.totalItems - 1,
-          totalPrice: state.totalPrice - existingItem.price * existingItem.quantity,
-        }
+        updatedItems = state.items.filter((item) => item.id !== action.payload.id)
       } else {
-        const newItem = { ...action.payload, quantity: 1 }
-        return {
-          ...state,
-          items: [...state.items, newItem],
-          totalItems: state.totalItems + 1,
-          totalPrice: state.totalPrice + action.payload.price,
-        }
+        updatedItems = [...state.items, { ...action.payload, quantity: 1 }]
       }
-    }
 
-    case "ADD_ITEM": {
-      const existingItem = state.items.find((item) => item.id === action.payload.id)
-
-      if (existingItem) {
-        const updatedItems = state.items.map((item) =>
-          item.id === action.payload.id ? { ...item, quantity: item.quantity + 1 } : item,
-        )
-        return {
-          ...state,
-          items: updatedItems,
-          totalItems: state.totalItems,
-          totalPrice: state.totalPrice + action.payload.price,
-        }
-      } else {
-        const newItem = { ...action.payload, quantity: 1 }
-        return {
-          ...state,
-          items: [...state.items, newItem],
-          totalItems: state.totalItems + 1,
-          totalPrice: state.totalPrice + action.payload.price,
-        }
-      }
-    }
-
-    case "REMOVE_ITEM": {
-      const itemToRemove = state.items.find((item) => item.id === action.payload)
-      if (!itemToRemove) return state
-
-      return {
-        ...state,
-        items: state.items.filter((item) => item.id !== action.payload),
-        totalItems: state.totalItems - 1,
-        totalPrice: state.totalPrice - itemToRemove.price * itemToRemove.quantity,
-      }
-    }
-
-    case "UPDATE_QUANTITY": {
-      const item = state.items.find((item) => item.id === action.payload.id)
-      if (!item) return state
-
-      const priceDiff = (action.payload.quantity - item.quantity) * item.price
-      const updatedItems = state.items.map((item) =>
-        item.id === action.payload.id ? { ...item, quantity: action.payload.quantity } : item,
+      const totalPrice = updatedItems.reduce(
+        (acc, item) => acc + item.price * item.quantity,
+        0,
       )
 
       return {
         ...state,
         items: updatedItems,
-        totalItems: state.totalItems,
-        totalPrice: state.totalPrice + priceDiff,
+        totalItems: updatedItems.length,
+        totalPrice,
+      }
+    }
+
+    case "ADD_ITEM": {
+      const existingItem = state.items.find((item) => item.id === action.payload.id)
+      let updatedItems: CartItem[]
+
+      if (existingItem) {
+        updatedItems = state.items.map((item) =>
+          item.id === action.payload.id ? { ...item, quantity: item.quantity + 1 } : item,
+        )
+      } else {
+        updatedItems = [...state.items, { ...action.payload, quantity: 1 }]
+      }
+
+      const totalPrice = updatedItems.reduce(
+        (acc, item) => acc + item.price * item.quantity,
+        0,
+      )
+
+      return {
+        ...state,
+        items: updatedItems,
+        totalItems: updatedItems.length,
+        totalPrice,
+      }
+    }
+
+    case "REMOVE_ITEM": {
+      const updatedItems = state.items.filter((item) => item.id !== action.payload)
+      const totalPrice = updatedItems.reduce(
+        (acc, item) => acc + item.price * item.quantity,
+        0,
+      )
+
+      return {
+        ...state,
+        items: updatedItems,
+        totalItems: updatedItems.length,
+        totalPrice,
+      }
+    }
+
+    case "UPDATE_QUANTITY": {
+      const updatedItems = state.items
+        .map((item) =>
+          item.id === action.payload.id
+            ? { ...item, quantity: Math.max(0, action.payload.quantity) }
+            : item,
+        )
+        .filter((item) => item.quantity > 0)
+
+      const totalPrice = updatedItems.reduce(
+        (acc, item) => acc + item.price * item.quantity,
+        0,
+      )
+
+      return {
+        ...state,
+        items: updatedItems,
+        totalItems: updatedItems.length,
+        totalPrice,
       }
     }
 
