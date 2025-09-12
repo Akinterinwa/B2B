@@ -61,7 +61,8 @@ export function Header() {
   const [showSearchResults, setShowSearchResults] = useState(false)
   const { state } = useCart()
 
-  const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0)
+  // Show count of unique products, not total quantity
+  const totalItems = state.items.length
 
   const searchResults = products
     .filter(

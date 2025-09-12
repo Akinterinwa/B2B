@@ -45,7 +45,6 @@ export function OrderSummary({
     const subtotal = state.totalPrice
     const deliveryFee = 15000
     const total = subtotal + deliveryFee
-    const totalItems = state.totalItems
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault()
@@ -174,10 +173,40 @@ Please confirm availability and payment details.`
         <form onSubmit={handleSubmit} className="space-y-6">
             <Card>
                 <CardHeader>
-                    <CardTitle>Order Summary ({totalItems} items)</CardTitle>
+                    <CardTitle>Order Summary</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {/* ... cart items ... */}
+                    {/* Cart Items Breakdown */}
+                    <div className="space-y-3">
+                        {cartItems.map((item) => (
+                            <div key={item.id} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                                <div className="flex-1">
+                                    <h4 className="font-medium text-gray-900 text-sm">{item.name}</h4>
+                                    <p className="text-xs text-gray-500">₦{item.price.toLocaleString()} per unit</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="font-medium text-gray-900">₦{(item.price * item.quantity).toLocaleString()}</p>
+                                    <p className="text-xs text-gray-500">{item.quantity} unit{item.quantity > 1 ? 's' : ''}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Price Breakdown */}
+                    <div className="border-t pt-4 space-y-2">
+                        <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Subtotal:</span>
+                            <span className="font-medium">₦{subtotal.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Delivery Fee:</span>
+                            <span className="font-medium">₦{deliveryFee.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-lg font-bold border-t pt-2">
+                            <span>Total Amount:</span>
+                            <span className="text-blue-900">₦{total.toLocaleString()}</span>
+                        </div>
+                    </div>
                 </CardContent>
             </Card>
 

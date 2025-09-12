@@ -62,13 +62,17 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 
         case 'UPSERT_ITEM': {
             const existingItemIndex = updatedItems.findIndex((item) => item.id === action.payload.id);
+            const newQuantity = Math.max(1, action.payload.quantity || 1); // Ensure minimum quantity of 1
+
             if (existingItemIndex > -1) {
+                // Update existing item with new quantity and other properties
                 updatedItems[existingItemIndex] = {
-                    ...updatedItems[existingItemIndex],
-                    quantity: action.payload.quantity || 1,
+                    ...action.payload,
+                    quantity: newQuantity,
                 };
             } else {
-                updatedItems.push({ ...action.payload, quantity: action.payload.quantity || 1 });
+                // Add new item to cart
+                updatedItems.push({ ...action.payload, quantity: newQuantity });
             }
             break;
         }
@@ -98,7 +102,8 @@ function cartReducer(state: CartState, action: CartAction): CartState {
     }
 
     const totalPrice = updatedItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const totalItems = updatedItems.reduce((acc, item) => acc + item.quantity, 0);
+    // totalItems now represents the count of unique products, not total quantity
+    const totalItems = updatedItems.length;
 
     return {
         ...state,

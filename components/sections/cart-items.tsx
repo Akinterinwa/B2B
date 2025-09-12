@@ -25,27 +25,20 @@ export function CartItems() {
 
   const handleLocalQuantityChange = (id: number, newQuantity: number) => {
     if (newQuantity < 1) return
+
+    // Update local state immediately
     setLocalQuantities((prev) => ({
       ...prev,
       [id]: newQuantity,
     }))
-  }
 
-  const updateCart = () => {
-    Object.keys(localQuantities).forEach((idStr) => {
-      const id = Number(idStr)
-      const cartItem = state.items.find((item) => item.id === id)
-      if (cartItem && cartItem.quantity !== localQuantities[id]) {
-        dispatch({ type: "UPDATE_QUANTITY", payload: { id, quantity: localQuantities[id] } })
-      }
-    })
+    // Update cart in real-time
+    dispatch({ type: "UPDATE_QUANTITY", payload: { id, quantity: newQuantity } })
   }
 
   const removeItem = (id: number) => {
     dispatch({ type: "REMOVE_ITEM", payload: id })
   }
-
-  const isDirty = state.items.some((item) => localQuantities[item.id] !== item.quantity)
 
   if (state.items.length === 0) {
     return (
@@ -150,11 +143,6 @@ export function CartItems() {
           </Card>
         )
       })}
-      {isDirty && (
-        <div className="flex justify-end pt-4">
-          <Button onClick={updateCart}>Update Cart</Button>
-        </div>
-      )}
     </div>
   )
 }

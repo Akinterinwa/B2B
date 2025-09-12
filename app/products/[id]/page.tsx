@@ -78,11 +78,15 @@ export default function ProductDetailPage() {
 
     useEffect(() => {
         if (cartItem) {
+            // Sync with cart quantity when component mounts or cart changes
             setQuantity(cartItem.quantity);
         } else {
+            // Reset to 1 if item is not in cart
             setQuantity(1);
         }
     }, [cartItem]);
+
+    // Remove automatic sync - quantity changes should not affect cart until user clicks Add to Cart or Proceed to Checkout
 
     if (isLoading) {
         return null; // This will show the loading.tsx file
@@ -109,9 +113,15 @@ export default function ProductDetailPage() {
         dispatch({ type: 'UPSERT_ITEM', payload: { ...product, quantity } });
     };
 
-    const handleProceedToCheckout = () => {
+    const handleProceedToCheckout = async () => {
+        // Ensure the cart is updated before navigation
         dispatch({ type: 'UPSERT_ITEM', payload: { ...product, quantity } });
-        router.push('/cart'); // Navigate to cart page
+
+        // Wait for the next tick to ensure state is updated
+        await new Promise(resolve => setTimeout(resolve, 50));
+
+        // Navigate to cart page
+        router.push('/cart');
     };
 
     const handleQuantityChange = (newQuantity: number) => {
