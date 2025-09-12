@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation'; // Import useRouter
 import { useCart } from '@/lib/cart-context';
-import { getProductById } from '@/lib/products-data';
+import { getProductById, type Product } from '@/lib/products-data';
 import { Header } from '@/components/sections/header';
 import { Footer } from '@/components/sections/footer';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,7 @@ export default function ProductDetailPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const [isProceedingToCheckout, setIsProceedingToCheckout] = useState(false);
-    const [product, setProduct] = useState<(typeof products)[0] | null>(null);
+    const [product, setProduct] = useState<Product | null>(null);
     const productId = Number.parseInt(params.id as string);
     const isInCart = state.items.some((item) => item.id === productId);
     const cartItem = state.items.find((item) => item.id === productId);
