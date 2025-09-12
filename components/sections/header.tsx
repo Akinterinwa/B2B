@@ -2,85 +2,109 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Search, ShoppingCart, User, Menu, X, Phone, Mail } from "lucide-react"
+import { Search, ShoppingCart, User, Menu, X, Phone, Mail, Star, Package } from "lucide-react"
 import { useCart } from "@/lib/cart-context"
-
-const products = [
-  {
-    id: 1,
-    name: "Dangote Cement 50kg Bag",
-    price: 4500,
-    category: "Foundation Materials",
-    image: "/images/concrete-foundation-materials.png",
-  },
-  {
-    id: 2,
-    name: "Premium Pine Lumber 2x4x8ft",
-    price: 1200,
-    category: "Lumber & Framing",
-    image: "/images/lumber-wood-framing-materials.png",
-  },
-  {
-    id: 3,
-    name: "Asphalt Roofing Shingles",
-    price: 8500,
-    category: "Roofing Systems",
-    image: "/images/roofing-shingles-materials.png",
-  },
-  {
-    id: 4,
-    name: "Electrical Wire 12 AWG 250ft",
-    price: 15000,
-    category: "Electrical Supplies",
-    image: "/images/electrical-wiring-supplies.png",
-  },
-  {
-    id: 5,
-    name: "PVC Pipe 4 inch x 10ft",
-    price: 2800,
-    category: "Plumbing",
-    image: "/images/plumbing-pipes-fixtures.png",
-  },
-  {
-    id: 6,
-    name: "Galvanized Nails 3 inch (5kg)",
-    price: 3200,
-    category: "Hardware & Fasteners",
-    image: "/images/construction-hardware-nails-screws.png",
-  },
-]
+import { searchProducts, type Product } from "@/lib/products-data"
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [showSearchResults, setShowSearchResults] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(-1)
+  const [isSearching, setIsSearching] = useState(false)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const router = useRouter()
   const { state } = useCart()
 
   // Show count of unique products, not total quantity
   const totalItems = state.items.length
 
-  const searchResults = products
-    .filter(
-      (product) =>
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.category.toLowerCase().includes(searchQuery.toLowerCase()),
-    )
-    .slice(0, 5) // Limit to 5 results
+  // Enhanced search with debouncing
+  const [searchResults, setSearchResults] = useState<Product[]>([])
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([])
+      setShowSearchResults(false)
+      return
+    }
+
+    setIsSearching(true)
+    const timeoutId = setTimeout(() => {
+      const results = searchProducts(searchQuery, 8) // Get up to 8 results
+      setSearchResults(results)
+      setShowSearchResults(true)
+      setIsSearching(false)
+      setSelectedIndex(-1)
+    }, 300) // 300ms debounce
+
+    return () => clearTimeout(timeoutId)
+  }, [searchQuery])
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setSearchQuery(value)
-    setShowSearchResults(value.length > 0)
   }
 
-  const handleSearchResultClick = () => {
+  const handleSearchResultClick = (productId?: number) => {
     setShowSearchResults(false)
     setSearchQuery("")
+    setSelectedIndex(-1)
+
+    if (productId) {
+      router.push(`/products/${productId}`)
+    }
+  }
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      if (selectedIndex >= 0 && searchResults[selectedIndex]) {
+        // Navigate to selected product
+        router.push(`/products/${searchResults[selectedIndex].id}`)
+      } else {
+        // Navigate to products page with search query
+        router.push(`/products?search=${encodeURIComponent(searchQuery)}`)
+      }
+      handleSearchResultClick()
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!showSearchResults || searchResults.length === 0) return
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault()
+        setSelectedIndex(prev =>
+          prev < searchResults.length - 1 ? prev + 1 : prev
+        )
+        break
+      case 'ArrowUp':
+        e.preventDefault()
+        setSelectedIndex(prev => prev > 0 ? prev - 1 : -1)
+        break
+      case 'Enter':
+        e.preventDefault()
+        if (selectedIndex >= 0 && searchResults[selectedIndex]) {
+          router.push(`/products/${searchResults[selectedIndex].id}`)
+          handleSearchResultClick()
+        } else {
+          handleSearchSubmit(e)
+        }
+        break
+      case 'Escape':
+        setShowSearchResults(false)
+        setSelectedIndex(-1)
+        searchInputRef.current?.blur()
+        break
+    }
   }
 
   return (
@@ -122,48 +146,100 @@ export function Header() {
 
           {/* Search Bar */}
           <div className="hidden md:flex flex-1 max-w-2xl mx-8">
-            <div className="relative w-full">
+            <form onSubmit={handleSearchSubmit} className="relative w-full">
               <Input
+                ref={searchInputRef}
                 type="text"
                 placeholder="Search for construction materials..."
                 className="pl-10 pr-4 py-2 w-full"
                 value={searchQuery}
                 onChange={handleSearchChange}
+                onKeyDown={handleKeyDown}
                 onFocus={() => searchQuery && setShowSearchResults(true)}
                 onBlur={() => setTimeout(() => setShowSearchResults(false), 200)}
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
 
-              {showSearchResults && searchResults.length > 0 && (
-                <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-50 mt-1">
-                  {searchResults.map((product) => (
-                    <Link
-                      key={product.id}
-                      href={`/products/${product.id}`}
-                      onClick={handleSearchResultClick}
-                      className="flex items-center p-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
-                    >
-                      <div className="w-12 h-12 bg-gray-100 rounded-md mr-3 flex-shrink-0">
-                        <img
-                          src={product.image || "/placeholder.svg"}
-                          alt={product.name}
-                          className="w-full h-full object-cover rounded-md"
-                        />
+              {/* Search Results Dropdown */}
+              {(showSearchResults && (searchResults.length > 0 || isSearching)) && (
+                <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-50 mt-1 max-h-96 overflow-y-auto">
+                  {isSearching ? (
+                    <div className="p-4 text-center text-gray-500 text-sm">
+                      <div className="animate-spin inline-block w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full mr-2"></div>
+                      Searching...
+                    </div>
+                  ) : searchResults.length > 0 ? (
+                    <>
+                      {searchResults.map((product, index) => (
+                        <div
+                          key={product.id}
+                          onClick={() => handleSearchResultClick(product.id)}
+                          className={`flex items-center p-3 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${
+                            index === selectedIndex
+                              ? 'bg-blue-50 border-blue-200'
+                              : 'hover:bg-gray-50'
+                          }`}
+                        >
+                          <div className="w-12 h-12 bg-gray-100 rounded-md mr-3 flex-shrink-0 overflow-hidden">
+                            <img
+                              src={product.image || "/placeholder.svg"}
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-medium text-gray-900 truncate">{product.name}</h4>
+                            <div className="flex items-center gap-2 mt-1">
+                              <p className="text-xs text-gray-500">{product.category}</p>
+                              <div className="flex items-center">
+                                <Star className="h-3 w-3 text-yellow-400 fill-current" />
+                                <span className="text-xs text-gray-500 ml-1">{product.rating}</span>
+                              </div>
+                              {!product.inStock && (
+                                <Badge variant="secondary" className="text-xs">Out of Stock</Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center justify-between mt-1">
+                              <p className="text-sm font-semibold text-blue-900">₦{product.price.toLocaleString()}</p>
+                              <p className="text-xs text-gray-500">{product.supplier}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      <div className="p-2 border-t bg-gray-50">
+                        <button
+                          type="submit"
+                          className="w-full text-left px-2 py-1 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded"
+                        >
+                          View all results for "{searchQuery}" →
+                        </button>
                       </div>
-                      <div className="flex-1">
-                        <h4 className="font-medium text-sm text-gray-900">{product.name}</h4>
-                        <p className="text-xs text-gray-500">{product.category}</p>
-                        <p className="text-sm font-semibold text-blue-900">₦{product.price.toLocaleString()}</p>
+                    </>
+                  ) : (
+                    <div className="p-4 text-center text-gray-500 text-sm">
+                      <Package className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                      No products found for "{searchQuery}"
+                      <div className="mt-2">
+                        <button
+                          type="submit"
+                          className="text-blue-600 hover:text-blue-800 text-xs"
+                        >
+                          Search all products →
+                        </button>
                       </div>
-                    </Link>
-                  ))}
-                  {searchQuery && searchResults.length === 0 && (
-                    <div className="p-3 text-center text-gray-500 text-sm">No products found for "{searchQuery}"</div>
+                    </div>
                   )}
                 </div>
               )}
-            </div>
-            <Button className="ml-2 bg-blue-900 hover:bg-blue-800">Search</Button>
+            </form>
+            <Button
+              type="submit"
+              onClick={handleSearchSubmit}
+              className="ml-2 bg-blue-900 hover:bg-blue-800 btn-hover-lift"
+              disabled={!searchQuery.trim()}
+            >
+              Search
+            </Button>
           </div>
 
           {/* Right Side Actions */}
@@ -201,44 +277,85 @@ export function Header() {
 
         {/* Mobile Search */}
         <div className="md:hidden mt-4">
-          <div className="relative">
+          <form onSubmit={handleSearchSubmit} className="relative">
             <Input
               type="text"
               placeholder="Search materials..."
               className="pl-10 pr-4 py-2 w-full"
               value={searchQuery}
               onChange={handleSearchChange}
+              onKeyDown={handleKeyDown}
               onFocus={() => searchQuery && setShowSearchResults(true)}
               onBlur={() => setTimeout(() => setShowSearchResults(false), 200)}
             />
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
 
-            {showSearchResults && searchResults.length > 0 && (
-              <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-50 mt-1">
-                {searchResults.map((product) => (
-                  <Link
-                    key={product.id}
-                    href={`/products/${product.id}`}
-                    onClick={handleSearchResultClick}
-                    className="flex items-center p-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
-                  >
-                    <div className="w-10 h-10 bg-gray-100 rounded-md mr-3 flex-shrink-0">
-                      <img
-                        src={product.image || "/placeholder.svg"}
-                        alt={product.name}
-                        className="w-full h-full object-cover rounded-md"
-                      />
+            {/* Mobile Search Results */}
+            {(showSearchResults && (searchResults.length > 0 || isSearching)) && (
+              <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-50 mt-1 max-h-80 overflow-y-auto">
+                {isSearching ? (
+                  <div className="p-3 text-center text-gray-500 text-sm">
+                    <div className="animate-spin inline-block w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full mr-2"></div>
+                    Searching...
+                  </div>
+                ) : searchResults.length > 0 ? (
+                  <>
+                    {searchResults.map((product, index) => (
+                      <div
+                        key={product.id}
+                        onClick={() => handleSearchResultClick(product.id)}
+                        className={`flex items-center p-3 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${
+                          index === selectedIndex
+                            ? 'bg-blue-50 border-blue-200'
+                            : 'hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="w-10 h-10 bg-gray-100 rounded-md mr-3 flex-shrink-0 overflow-hidden">
+                          <img
+                            src={product.image || "/placeholder.svg"}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-medium text-gray-900 truncate">{product.name}</h4>
+                          <div className="flex items-center gap-2 mt-1">
+                            <p className="text-xs text-gray-500">{product.category}</p>
+                            <div className="flex items-center">
+                              <Star className="h-3 w-3 text-yellow-400 fill-current" />
+                              <span className="text-xs text-gray-500 ml-1">{product.rating}</span>
+                            </div>
+                          </div>
+                          <p className="text-sm font-semibold text-blue-900 mt-1">₦{product.price.toLocaleString()}</p>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="p-2 border-t bg-gray-50">
+                      <button
+                        type="submit"
+                        className="w-full text-left px-2 py-1 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded"
+                      >
+                        View all results →
+                      </button>
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-sm text-gray-900">{product.name}</h4>
-                      <p className="text-xs text-gray-500">{product.category}</p>
-                      <p className="text-sm font-semibold text-blue-900">₦{product.price.toLocaleString()}</p>
+                  </>
+                ) : (
+                  <div className="p-3 text-center text-gray-500 text-sm">
+                    <Package className="h-6 w-6 mx-auto mb-2 text-gray-300" />
+                    No products found
+                    <div className="mt-2">
+                      <button
+                        type="submit"
+                        className="text-blue-600 hover:text-blue-800 text-xs"
+                      >
+                        Search all products →
+                      </button>
                     </div>
-                  </Link>
-                ))}
+                  </div>
+                )}
               </div>
             )}
-          </div>
+          </form>
         </div>
       </div>
 

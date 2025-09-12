@@ -1,7 +1,7 @@
 'use client';
 
 import type React from 'react';
-import { createContext, useContext, useReducer, type ReactNode, useEffect } from 'react';
+import { createContext, useContext, useReducer, useState, type ReactNode, useEffect } from 'react';
 
 export interface CartItem {
     id: number;
@@ -121,25 +121,46 @@ const initialState: CartState = {
 
 export function CartProvider({ children }: { children: ReactNode }) {
     const [state, dispatch] = useReducer(cartReducer, initialState);
+    const [isLoaded, setIsLoaded] = useState(false);
 
+    // Load cart from localStorage on mount
     useEffect(() => {
         const storedCart = localStorage.getItem('cart');
+
         if (storedCart) {
             try {
                 const parsedCart = JSON.parse(storedCart);
-                dispatch({ type: 'SET_STATE', payload: parsedCart });
+
+                // Validate the stored cart structure
+                if (parsedCart && typeof parsedCart === 'object' && Array.isArray(parsedCart.items)) {
+                    dispatch({ type: 'SET_STATE', payload: parsedCart });
+                } else {
+                    localStorage.removeItem('cart');
+                }
             } catch (e) {
                 console.error('Could not parse cart from local storage', e);
+                // Clear invalid data
+                localStorage.removeItem('cart');
             }
         }
+        setIsLoaded(true);
     }, []);
 
+    // Save cart to localStorage whenever state changes (but only after initial load)
     useEffect(() => {
-        localStorage.setItem('cart', JSON.stringify(state));
-        document.cookie = `cart=${encodeURIComponent(
-            JSON.stringify(state)
-        )}; path=/; max-age=2592000; samesite=lax`; // 30 days
-    }, [state]);
+        if (isLoaded) {
+            try {
+                localStorage.setItem('cart', JSON.stringify(state));
+
+                // Also save to cookie as backup
+                document.cookie = `cart=${encodeURIComponent(
+                    JSON.stringify(state)
+                )}; path=/; max-age=2592000; samesite=lax`; // 30 days
+            } catch (e) {
+                console.error('Could not save cart to localStorage', e);
+            }
+        }
+    }, [state, isLoaded]);
 
     return <CartContext.Provider value={{ state, dispatch }}>{children}</CartContext.Provider>;
 }
@@ -151,3 +172,5 @@ export function useCart() {
     }
     return context;
 }
+
+

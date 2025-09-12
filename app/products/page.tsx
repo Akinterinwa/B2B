@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { useCart } from "@/lib/cart-context"
+import { products } from "@/lib/products-data"
 import { Header } from "@/components/sections/header"
 import { Footer } from "@/components/sections/footer"
 import { Button } from "@/components/ui/button"
@@ -23,86 +24,7 @@ const categories = [
   "Hardware & Fasteners",
 ]
 
-const products = [
-  {
-    id: 1,
-    name: "Dangote Cement 50kg Bag",
-    price: 4500,
-    bulkPrice: 4200,
-    category: "Foundation Materials",
-    image: "/images/concrete-foundation-materials.png",
-    rating: 4.8,
-    reviews: 234,
-    supplier: "Dangote Factory Direct",
-    inStock: true,
-    bulkDiscount: "7% off 100+ bags",
-  },
-  {
-    id: 2,
-    name: "Premium Pine Lumber 2x4x8ft",
-    price: 1200,
-    bulkPrice: 1050,
-    category: "Lumber & Framing",
-    image: "/images/lumber-wood-framing-materials.png",
-    rating: 4.6,
-    reviews: 156,
-    supplier: "TimberCorp Direct",
-    inStock: true,
-    bulkDiscount: "12% off 50+ pieces",
-  },
-  {
-    id: 3,
-    name: "Asphalt Roofing Shingles",
-    price: 8500,
-    bulkPrice: 7800,
-    category: "Roofing Systems",
-    image: "/images/roofing-shingles-materials.png",
-    rating: 4.7,
-    reviews: 89,
-    supplier: "RoofMax Factory",
-    inStock: true,
-    bulkDiscount: "8% off 20+ bundles",
-  },
-  {
-    id: 4,
-    name: "Electrical Wire 12 AWG 250ft",
-    price: 15000,
-    bulkPrice: 13500,
-    category: "Electrical Supplies",
-    image: "/images/electrical-wiring-supplies.png",
-    rating: 4.9,
-    reviews: 312,
-    supplier: "ElectroSource Direct",
-    inStock: true,
-    bulkDiscount: "10% off 10+ rolls",
-  },
-  {
-    id: 5,
-    name: "PVC Pipe 4 inch x 10ft",
-    price: 2800,
-    bulkPrice: 2500,
-    category: "Plumbing",
-    image: "/images/plumbing-pipes-fixtures.png",
-    rating: 4.5,
-    reviews: 178,
-    supplier: "PlumbPro Factory",
-    inStock: false,
-    bulkDiscount: "11% off 25+ pipes",
-  },
-  {
-    id: 6,
-    name: "Galvanized Nails 3 inch (5kg)",
-    price: 3200,
-    bulkPrice: 2900,
-    category: "Hardware & Fasteners",
-    image: "/images/construction-hardware-nails-screws.png",
-    rating: 4.4,
-    reviews: 267,
-    supplier: "FastenMax Direct",
-    inStock: true,
-    bulkDiscount: "9% off 20+ boxes",
-  },
-]
+
 
 export default function ProductsPage() {
   const { state, dispatch } = useCart()
@@ -114,8 +36,14 @@ export default function ProductsPage() {
 
   useEffect(() => {
     const categoryParam = searchParams.get("category")
+    const searchParam = searchParams.get("search")
+
     if (categoryParam && categories.includes(categoryParam)) {
       setSelectedCategory(categoryParam)
+    }
+
+    if (searchParam) {
+      setSearchQuery(searchParam)
     }
   }, [searchParams])
 
@@ -378,7 +306,7 @@ export default function ProductsPage() {
                           <div className="flex space-x-2">
                             <Button
                               size="sm"
-                              className={`text-xs ${
+                              className={`text-xs btn-hover-lift ${
                                 isInCart(product.id) ? "bg-green-600 hover:bg-red-600" : "bg-blue-900 hover:bg-blue-800"
                               }`}
                               disabled={!product.inStock}
@@ -397,7 +325,7 @@ export default function ProductsPage() {
                               )}
                             </Button>
                             <Link href={`/products/${product.id}`}>
-                              <Button variant="outline" size="sm" className="text-xs bg-transparent">
+                              <Button variant="outline" size="sm" className="text-xs bg-transparent btn-hover-lift">
                                 <Eye className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
                                 View Details
                               </Button>

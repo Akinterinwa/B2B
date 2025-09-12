@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation'; // Import useRouter
 import { useCart } from '@/lib/cart-context';
+import { getProductById } from '@/lib/products-data';
 import { Header } from '@/components/sections/header';
 import { Footer } from '@/components/sections/footer';
 import { Button } from '@/components/ui/button';
@@ -13,43 +14,7 @@ import { Star, ShoppingCart, ArrowLeft, Truck, Shield, Award } from 'lucide-reac
 import Image from 'next/image';
 import Link from 'next/link';
 
-const products = [
-    {
-        id: 1,
-        name: 'Dangote Cement 50kg Bag',
-        price: 4500,
-        bulkPrice: 4200,
-        category: 'Foundation Materials',
-        image: '/images/concrete-foundation-materials.png',
-        rating: 4.8,
-        reviews: 234,
-        supplier: 'Dangote Factory Direct',
-        inStock: true,
-        bulkDiscount: '7% off 100+ bags',
-        description:
-            'Premium quality Portland cement perfect for all construction needs. Manufactured to international standards with consistent strength and durability.',
-        specifications: {
-            Weight: '50kg',
-            Type: 'Portland Cement',
-            Grade: '42.5N',
-            'Compressive Strength': '42.5 MPa',
-            'Setting Time': 'Initial: 45 min, Final: 10 hours',
-            Fineness: '300-400 m²/kg',
-        },
-        features: [
-            'High compressive strength',
-            'Consistent quality',
-            'Fast setting time',
-            'Suitable for all weather conditions',
-            'Factory sealed packaging',
-        ],
-        bulkPricing: [
-            { quantity: '1-49 bags', price: 4500 },
-            { quantity: '50-99 bags', price: 4350 },
-            { quantity: '100+ bags', price: 4200 },
-        ],
-    },
-];
+
 
 export default function ProductDetailPage() {
     const params = useParams();
@@ -58,6 +23,8 @@ export default function ProductDetailPage() {
     const [quantity, setQuantity] = useState(1);
     const [selectedImage, setSelectedImage] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
+    const [isAddingToCart, setIsAddingToCart] = useState(false);
+    const [isProceedingToCheckout, setIsProceedingToCheckout] = useState(false);
     const [product, setProduct] = useState<(typeof products)[0] | null>(null);
     const productId = Number.parseInt(params.id as string);
     const isInCart = state.items.some((item) => item.id === productId);
@@ -68,7 +35,7 @@ export default function ProductDetailPage() {
             setIsLoading(true);
             await new Promise((resolve) => setTimeout(resolve, 1500));
 
-            const foundProduct = products.find((p) => p.id === productId);
+            const foundProduct = getProductById(productId);
             setProduct(foundProduct || null);
             setIsLoading(false);
         };
@@ -109,19 +76,28 @@ export default function ProductDetailPage() {
         );
     }
 
-    const handleAddToCart = () => {
+    const handleAddToCart = async () => {
+        setIsAddingToCart(true);
+
+        // Simulate a brief loading state for better UX
+        await new Promise(resolve => setTimeout(resolve, 300));
+
         dispatch({ type: 'UPSERT_ITEM', payload: { ...product, quantity } });
+        setIsAddingToCart(false);
     };
 
     const handleProceedToCheckout = async () => {
+        setIsProceedingToCheckout(true);
+
         // Ensure the cart is updated before navigation
         dispatch({ type: 'UPSERT_ITEM', payload: { ...product, quantity } });
 
         // Wait for the next tick to ensure state is updated
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         // Navigate to cart page
         router.push('/cart');
+        setIsProceedingToCheckout(false);
     };
 
     const handleQuantityChange = (newQuantity: number) => {
@@ -247,21 +223,24 @@ export default function ProductDetailPage() {
 
                             <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
                                 <Button
-                                    className={`flex-1 ${
+                                    className={`flex-1 btn-hover-lift ${
                                         isInCart
                                             ? 'bg-red-600 hover:bg-red-700 text-white'
                                             : 'bg-blue-900 hover:bg-blue-800 text-white'
                                     }`}
                                     disabled={!product.inStock}
+                                    loading={isAddingToCart}
+                                    loadingText={isInCart ? 'Updating...' : 'Adding...'}
                                     onClick={handleAddToCart}>
                                     <ShoppingCart className="h-5 w-5 mr-2" />
                                     {isInCart ? 'Update Cart' : 'Add to Cart'}
                                 </Button>
                                 <Button
                                     variant="outline"
-                                    className="flex-1 bg-transparent"
-                                    onClick={handleProceedToCheckout} // Add this line
-                                >
+                                    className="flex-1 bg-transparent btn-hover-lift"
+                                    loading={isProceedingToCheckout}
+                                    loadingText="Redirecting..."
+                                    onClick={handleProceedToCheckout}>
                                     Proceed to Checkout
                                 </Button>
                             </div>
@@ -302,12 +281,16 @@ export default function ProductDetailPage() {
                                 <div>
                                     <h3 className="text-lg font-semibold mb-3">Key Features</h3>
                                     <ul className="space-y-2">
-                                        {product.features.map((feature, index) => (
-                                            <li key={index} className="flex items-center text-gray-700">
-                                                <span className="w-2 h-2 bg-blue-900 rounded-full mr-3 flex-shrink-0"></span>
-                                                {feature}
-                                            </li>
-                                        ))}
+                                        {product.features && product.features.length > 0 ? (
+                                            product.features.map((feature, index) => (
+                                                <li key={index} className="flex items-center text-gray-700">
+                                                    <span className="w-2 h-2 bg-blue-900 rounded-full mr-3 flex-shrink-0"></span>
+                                                    {feature}
+                                                </li>
+                                            ))
+                                        ) : (
+                                            <li className="text-gray-500">No features listed for this product.</li>
+                                        )}
                                     </ul>
                                 </div>
                             </TabsContent>
@@ -315,30 +298,44 @@ export default function ProductDetailPage() {
                             <TabsContent value="specifications" className="mt-6">
                                 <h3 className="text-lg font-semibold mb-4">Technical Specifications</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {Object.entries(product.specifications).map(([key, value]) => (
-                                        <div
-                                            key={key}
-                                            className="flex justify-between py-2 border-b border-gray-200">
-                                            <span className="font-medium text-gray-700">{key}:</span>
-                                            <span className="text-gray-900">{value}</span>
+                                    {product.specifications && Object.keys(product.specifications).length > 0 ? (
+                                        Object.entries(product.specifications).map(([key, value]) => (
+                                            <div
+                                                key={key}
+                                                className="flex justify-between py-2 border-b border-gray-200">
+                                                <span className="font-medium text-gray-700">{key}:</span>
+                                                <span className="text-gray-900">{value}</span>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="col-span-2 p-4 bg-gray-50 rounded-lg text-center text-gray-500">
+                                            <p>Technical specifications not available for this product.</p>
+                                            <p className="text-sm mt-2">Contact us for detailed specifications.</p>
                                         </div>
-                                    ))}
+                                    )}
                                 </div>
                             </TabsContent>
 
                             <TabsContent value="pricing" className="mt-6">
                                 <h3 className="text-lg font-semibold mb-4">Volume Pricing</h3>
                                 <div className="space-y-3">
-                                    {product.bulkPricing.map((tier, index) => (
-                                        <div
-                                            key={index}
-                                            className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                                            <span className="font-medium text-gray-700">{tier.quantity}</span>
-                                            <span className="text-lg font-bold text-gray-900">
-                                                ₦{tier.price.toLocaleString()}
-                                            </span>
+                                    {product.bulkPricing && product.bulkPricing.length > 0 ? (
+                                        product.bulkPricing.map((tier, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                                                <span className="font-medium text-gray-700">{tier.quantity}</span>
+                                                <span className="text-lg font-bold text-gray-900">
+                                                    ₦{tier.price.toLocaleString()}
+                                                </span>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="p-4 bg-gray-50 rounded-lg text-center text-gray-500">
+                                            <p>Volume pricing information not available for this product.</p>
+                                            <p className="text-sm mt-2">Contact us for bulk pricing options.</p>
                                         </div>
-                                    ))}
+                                    )}
                                 </div>
                             </TabsContent>
                         </Tabs>

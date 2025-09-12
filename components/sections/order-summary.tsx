@@ -276,9 +276,11 @@ Please confirm availability and payment details.`
 
                     <Button
                         type="submit"
-                        className="w-full"
-                        disabled={loading || !contactInfo.firstName || !contactInfo.lastName || !contactInfo.email || !contactInfo.phone || !contactInfo.location}>
-                        {loading ? 'Generating...' : 'Generate Order Code'}
+                        className="w-full bg-blue-900 hover:bg-blue-800 btn-hover-lift"
+                        disabled={!contactInfo.firstName || !contactInfo.lastName || !contactInfo.email || !contactInfo.phone || !contactInfo.location}
+                        loading={loading}
+                        loadingText="Generating Order Code...">
+                        Generate Order Code
                     </Button>
                 </CardContent>
             </Card>

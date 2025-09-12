@@ -11,13 +11,20 @@ export function CostCalculator() {
   const [houseType, setHouseType] = useState("")
   const [squareFootage, setSquareFootage] = useState("")
   const [location, setLocation] = useState("")
-  const [estimatedCost, setEstimatedCost] = useState(0) 
+  const [estimatedCost, setEstimatedCost] = useState(0)
+  const [isCalculating, setIsCalculating] = useState(false)
 
-  const calculateCost = () => {
+  const calculateCost = async () => {
     if (houseType && squareFootage) {
+      setIsCalculating(true)
+
+      // Simulate calculation time for better UX
+      await new Promise(resolve => setTimeout(resolve, 800))
+
       const baseRate = houseType === "single-family" ? 120 : houseType === "duplex" ? 110 : 95
       const cost = Number.parseInt(squareFootage) * baseRate
       setEstimatedCost(cost)
+      setIsCalculating(false)
     }
   }
 
@@ -76,8 +83,10 @@ export function CostCalculator() {
 
                 <Button
                   onClick={calculateCost}
-                  className="w-full bg-orange-500 hover:bg-orange-600"
+                  className="w-full bg-orange-500 hover:bg-orange-600 btn-hover-lift"
                   disabled={!houseType || !squareFootage}
+                  loading={isCalculating}
+                  loadingText="Calculating..."
                 >
                   Calculate Estimate
                 </Button>
@@ -107,7 +116,7 @@ export function CostCalculator() {
                       <span>Total Estimate</span>
                       <span className="text-orange-600">${estimatedCost.toLocaleString()}</span>
                     </div>
-                    <Button variant="outline" className="w-full mt-4 bg-transparent">
+                    <Button variant="outline" className="w-full mt-4 bg-transparent btn-hover-lift">
                       Get Detailed Quote
                     </Button>
                   </div>

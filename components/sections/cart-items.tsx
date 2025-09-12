@@ -92,20 +92,22 @@ export function CartItems() {
                       <Button
                         variant="outline"
                         size="sm"
+                        className="btn-hover-lift hover:bg-red-50 hover:border-red-300"
                         onClick={() => handleLocalQuantityChange(item.id, localQuantity - 1)}
                         disabled={localQuantity <= 1}
                       >
-                        -
+                        <Minus className="h-3 w-3" />
                       </Button>
-                      <span className="px-4 py-2 border rounded-md text-center min-w-[60px]">
+                      <span className="px-4 py-2 border rounded-md text-center min-w-[60px] font-medium">
                         {localQuantity}
                       </span>
                       <Button
                         variant="outline"
                         size="sm"
+                        className="btn-hover-lift hover:bg-green-50 hover:border-green-300"
                         onClick={() => handleLocalQuantityChange(item.id, localQuantity + 1)}
                       >
-                        +
+                        <Plus className="h-3 w-3" />
                       </Button>
                     </div>
 
@@ -121,7 +123,7 @@ export function CartItems() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 btn-hover-lift"
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -130,7 +132,7 @@ export function CartItems() {
                           variant="ghost"
                           size="sm"
                           onClick={() => removeItem(item.id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 btn-hover-lift hover:scale-110"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

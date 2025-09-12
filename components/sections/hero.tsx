@@ -34,7 +34,7 @@ export function Hero() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/tracking">
-                <Button size="lg" className="bg-orange-500 hover:bg-orange-600 w-full sm:w-auto">
+                <Button size="lg" className="bg-orange-500 hover:bg-orange-600 w-full sm:w-auto btn-hover-lift btn-hover-glow">
                   Check Tracking Code
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -42,7 +42,7 @@ export function Hero() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-white text-white hover:bg-white hover:text-blue-900 bg-transparent"
+                className="border-white text-white hover:bg-white hover:text-blue-900 bg-transparent btn-hover-lift"
                 onClick={scrollToCostCalculator}
               >
                 Calculate Project Cost
