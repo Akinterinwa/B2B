@@ -125,22 +125,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     // Load cart from localStorage on mount
     useEffect(() => {
-        const storedCart = localStorage.getItem('cart');
+        if (typeof window !== 'undefined') {
+            const storedCart = localStorage.getItem('cart');
 
-        if (storedCart) {
-            try {
-                const parsedCart = JSON.parse(storedCart);
+            if (storedCart) {
+                try {
+                    const parsedCart = JSON.parse(storedCart);
 
-                // Validate the stored cart structure
-                if (parsedCart && typeof parsedCart === 'object' && Array.isArray(parsedCart.items)) {
-                    dispatch({ type: 'SET_STATE', payload: parsedCart });
-                } else {
+                    // Validate the stored cart structure
+                    if (parsedCart && typeof parsedCart === 'object' && Array.isArray(parsedCart.items)) {
+                        dispatch({ type: 'SET_STATE', payload: parsedCart });
+                    } else {
+                        localStorage.removeItem('cart');
+                    }
+                } catch (e) {
+                    console.error('Could not parse cart from local storage', e);
+                    // Clear invalid data
                     localStorage.removeItem('cart');
                 }
-            } catch (e) {
-                console.error('Could not parse cart from local storage', e);
-                // Clear invalid data
-                localStorage.removeItem('cart');
             }
         }
         setIsLoaded(true);
@@ -148,7 +150,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     // Save cart to localStorage whenever state changes (but only after initial load)
     useEffect(() => {
-        if (isLoaded) {
+        if (isLoaded && typeof window !== 'undefined') {
             try {
                 localStorage.setItem('cart', JSON.stringify(state));
 
